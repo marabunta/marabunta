@@ -6,3 +6,4 @@ prototype
 * gRPC as communication protocol
 * Distributed states/recipes (gitfs)
 * Raft for nodes https://raft.github.io/
+* masterless
