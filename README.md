@@ -3,7 +3,7 @@
 prototype
 
 * Listen port 50111
-* gRPC as communication protocol
+* HTTP2/gRPC as communication protocol
 * Distributed states/recipes (gitfs)
 * Raft for nodes https://raft.github.io/
 * masterless
