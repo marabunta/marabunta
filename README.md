@@ -7,3 +7,4 @@ prototype
 * Distributed states/recipes (gitfs)
 * Raft for nodes https://raft.github.io/
 * masterless
+* broadcast/find via UDP/DNS
