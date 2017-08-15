@@ -10,14 +10,14 @@ deps:
 	${GO} get github.com/nbari/violetear/middleware
 
 build: deps
-	# ${GO} build -ldflags "-X main.version=${VERSION}"
-	env GOOS=freebsd GOARCH=amd64 ${GO} build -ldflags "-s -w -X main.version=${VERSION}"
+	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o marabunta cmd/marabunta/main.go;
+	# env GOOS=freebsd GOARCH=amd64 ${GO} build -ldflags "-s -w -X main.version=${VERSION}"
 
 test: deps
 	${GO} test -v
 
 clean:
-	@rm -rf comments
+	@rm -rf marabunta *.out
 
 cover:
 	${GO} test -cover && \
