@@ -8,3 +8,4 @@ prototype
 * Raft for nodes https://raft.github.io/
 * masterless
 * broadcast/find via UDP/DNS
+* consider nats.io
