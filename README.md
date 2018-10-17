@@ -9,3 +9,4 @@ prototype
 * masterless
 * broadcast/find via UDP/DNS
 * consider nats.io
+* find a way of self install the client via (https?)
