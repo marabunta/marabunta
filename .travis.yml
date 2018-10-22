@@ -1,8 +1,9 @@
+---
 language: go
 
 go:
-  - 1.8
-  - tip
+  - "1.11"
+  - master
 
 before_install:
   - go get github.com/axw/gocov/gocov
