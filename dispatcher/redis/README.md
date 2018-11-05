@@ -8,6 +8,7 @@ RPOPLPUSH https://redis.io/commands/rpoplpush#pattern-reliable-queue
 
 # Flow
 
+Each queue is a `LIST`, publishers will use `LPUSH`,  check `BRPOPLPUSH` and `RPOP`
 
 For on demand tasks:
 
