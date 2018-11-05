@@ -8,13 +8,13 @@ RPOPLPUSH https://redis.io/commands/rpoplpush#pattern-reliable-queue
 
 # Flow
 
-Each queue is a `LIST`, publishers will use `LPUSH`,  check `BRPOPLPUSH` and `RPOP`
+Each queue is a `LIST`, publishers will use `LPUSH`,  clients `BRPOPLPUSH` and their own queue
 
 For on demand tasks:
 
 Based on the tasks the scheduler writes to `event_queue`
-Agents read from `event_queue` (probably blocking `BRPOPLPUSH`)
-Agent gets an event and put in the `processing_queue` when done event is removed from the queue, if it crashes event remains in the `processing_queue` (need to find a GC here)
+Agents read from `event_queue` (`BRPOPLPUSH`)
+Agent gets an event and put in the `processing_queue-XXX` when done event is removed from the queue, if it crashes event remains in the `processing_queue` (need to find a GC here)
 
 For scheduled tasks use a `zset`
 
