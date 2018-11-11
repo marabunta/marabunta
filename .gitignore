@@ -6,3 +6,5 @@ server.crt
 server.key
 coverage.*
 vendor
+docker/mysql/*
+docker/redis/*
