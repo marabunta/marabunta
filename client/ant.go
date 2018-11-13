@@ -8,7 +8,6 @@ import (
 	"time"
 
 	pb "github.com/marabunta/protobuf"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -46,7 +45,7 @@ func (c *Client) Run(cert string) error {
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		return errors.WithMessage(err, "unable to connect")
+		return fmt.Errorf("%s unable to connect", err)
 	}
 	defer conn.Close()
 
@@ -83,9 +82,9 @@ func (c *Client) Receive(stream pb.Marabunta_StreamClient) error {
 	for {
 		res, err := stream.Recv()
 		if s, ok := status.FromError(err); ok && s.Code() == codes.Canceled {
-			return errors.WithMessage(err, "stream canceled")
+			return fmt.Errorf("%s, stream canceled")
 		} else if err == io.EOF {
-			return errors.WithMessage(err, "stream closed by server")
+			return fmt.Errorf("%s, stream closed by server")
 		} else if err != nil {
 			return err
 		}
