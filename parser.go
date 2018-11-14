@@ -19,7 +19,7 @@ func (p *Parse) Parse(fs *flag.FlagSet) (*Flags, error) {
 	fs.BoolVar(&p.Flags.Version, "v", false, "Print version")
 	fs.StringVar(&p.Flags.Configfile, "c", "", "`marabunta.yml` configuration file")
 	fs.StringVar(&p.Flags.Mysql, "mysql", "", "MySQL `DSN` username:password@address:port/dbname")
-	fs.StringVar(&p.Flags.Redis, "redis", "", "Redis `host:port`")
+	fs.StringVar(&p.Flags.Redis, "redis", "", "Redis `host:port` (default 127.0.0.1:6379)")
 	fs.UintVar(&p.Flags.GRPC, "grpc", 1415, "Listen on gRPC `port` (default 1415)")
 	fs.UintVar(&p.Flags.HTTP, "http", 8000, "Listen on HTTP `port` (default 8000)")
 	fs.StringVar(&p.Flags.TLSCA, "tls.ca", "", "Path to TLS Certificate Authority (`CA`)")
