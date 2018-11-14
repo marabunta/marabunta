@@ -28,6 +28,15 @@ func main() {
 	}
 	fmt.Printf("cfg = %+v\n", cfg)
 
+	m, err := marabunta.New(cfg)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	m.StartGRPC()
+	m.StartHTTP()
+
 	//go func() {
 	//err := marabunta.StartGRPC(*grpcPort, *certFile, *keyFile)
 	//if err != nil {
