@@ -2,8 +2,8 @@ package marabunta
 
 // Config yaml/command line configuration
 type Config struct {
-	HTTPPort int `yaml:"http_port"`
-	GRPCPort int `yaml:"grpc_port"`
+	HTTPPort uint `yaml:"http_port"`
+	GRPCPort uint `yaml:"grpc_port"`
 	MySQL    `yaml:"mysql"`
 	Redis    `yaml:"redis"`
 	TLS      `yaml:"tls"`
@@ -12,7 +12,7 @@ type Config struct {
 // MySQL configuration options
 type MySQL struct {
 	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
+	Port     uint   `yaml:"port"`
 	database string `yaml:"database"`
 	username string `yaml:"username"`
 	password string `yaml:"password"`
@@ -21,7 +21,7 @@ type MySQL struct {
 // Redis configuration options
 type Redis struct {
 	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Port uint   `yaml:"port"`
 }
 
 // TLS configuration options

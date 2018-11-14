@@ -9,7 +9,7 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
-// Parser command line options and configuration file
+// Parse command line options and configuration file
 type Parse struct {
 	Flags
 }
@@ -20,11 +20,11 @@ func (p *Parse) Parse(fs *flag.FlagSet) (*Flags, error) {
 	fs.StringVar(&p.Flags.Configfile, "c", "", "`marabunta.yml` configuration file")
 	fs.StringVar(&p.Flags.Mysql, "mysql", "", "MySQL `DSN` username:password@address:port/dbname")
 	fs.StringVar(&p.Flags.Redis, "redis", "", "Redis `host:port`")
-	fs.UintVar(&p.Flags.GRPC, "grpc", 1415, "Listen on gRPC `port` default 1415")
-	fs.UintVar(&p.Flags.HTTP, "http", 8000, "Listen on HTTP `port` default 8000")
-	fs.StringVar(&p.Flags.CA, "tls.ca", "", "Path to TLS Certificate Authority (`CA`)")
-	fs.StringVar(&p.Flags.Crt, "tls.crt", "", "Path to TLS `certificate`")
-	fs.StringVar(&p.Flags.Key, "tls.key", "", "Path to TLS `private key`")
+	fs.UintVar(&p.Flags.GRPC, "grpc", 1415, "Listen on gRPC `port` (default 1415)")
+	fs.UintVar(&p.Flags.HTTP, "http", 8000, "Listen on HTTP `port` (default 8000)")
+	fs.StringVar(&p.Flags.TLSCA, "tls.ca", "", "Path to TLS Certificate Authority (`CA`)")
+	fs.StringVar(&p.Flags.TLSCrt, "tls.crt", "", "Path to TLS `certificate`")
+	fs.StringVar(&p.Flags.TLSKey, "tls.key", "", "Path to TLS `private key`")
 
 	err := fs.Parse(os.Args[1:])
 	if err != nil {
@@ -76,39 +76,92 @@ func (p *Parse) Usage(fs *flag.FlagSet) func() {
 }
 
 // ParseArgs parse command arguments
-func (p *Parse) ParseArgs(fs *flag.FlagSet) (cfg *Config, err error) {
+func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 	flags, err := p.Parse(fs)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// if -v
 	if flags.Version {
-		return
+		return nil, nil
 	}
 
 	// if -c
 	if flags.Configfile != "" {
 		if !isFile(flags.Configfile) {
-			err = fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.Configfile, os.Args[0])
-			return
+			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.Configfile, os.Args[0])
 		}
 
 		// parse the `run.yml` file
-		cfg, err = p.parseYml(flags.Configfile)
+		cfg, err := p.parseYml(flags.Configfile)
 		if err != nil {
-			return
+			return nil, err
 		}
 
-		return
+		return cfg, nil
 	}
 
-	// if no args
-	if len(fs.Args()) < 1 {
-		err = fmt.Errorf("missing options, use (\"%s -h\") for help", os.Args[0])
-		return
+	if fs.NFlag() < 1 {
+		return nil, fmt.Errorf("missing options, use (\"%s -h\") for help", os.Args[0])
 	}
 
 	// create new cfg if not using -c
-	return
+	cfg := new(Config)
+
+	if flags.GRPC != 0 {
+		cfg.GRPCPort = uint(flags.GRPC)
+	}
+
+	if flags.HTTP != 0 {
+		cfg.HTTPPort = uint(flags.HTTP)
+	}
+
+	if flags.Mysql != "" {
+		// TODO parse DSN
+	} else {
+		return nil, fmt.Errorf("missing MySQL DSN, use (\"%s -h\") for help", os.Args[0])
+	}
+
+	if flags.Redis != "" {
+		// TODO parse redis
+	} else {
+		cfg.Redis = Redis{"127.0.0.1", 6379}
+	}
+
+	tls := TLS{}
+
+	// TLS CA
+	if flags.TLSCA != "" {
+		if !isFile(flags.TLSCA) {
+			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSCA, os.Args[0])
+		}
+		tls.CA = flags.TLSCA
+	} else {
+		return nil, fmt.Errorf("missing TLS CA, use (\"%s -h\") for help", os.Args[0])
+	}
+
+	// TLS certificate
+	if flags.TLSCrt != "" {
+		if !isFile(flags.TLSCrt) {
+			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSCrt, os.Args[0])
+		}
+		tls.Crt = flags.TLSCrt
+	} else {
+		return nil, fmt.Errorf("missing TLS certificate, use (\"%s -h\") for help", os.Args[0])
+	}
+
+	// TLS KEY
+	if flags.TLSKey != "" {
+		if !isFile(flags.TLSKey) {
+			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSKey, os.Args[0])
+		}
+		tls.Key = flags.TLSKey
+	} else {
+		return nil, fmt.Errorf("missing TLS Key, use (\"%s -h\") for help", os.Args[0])
+	}
+
+	cfg.TLS = tls
+
+	return cfg, nil
 }
