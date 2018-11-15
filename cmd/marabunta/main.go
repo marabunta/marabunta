@@ -28,14 +28,13 @@ func main() {
 	}
 	fmt.Printf("cfg = %+v\n", cfg)
 
-	m, err := marabunta.New(cfg)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	//m, err := marabunta.New(cfg)
+	//if err != nil {
+	//fmt.Fprintln(os.Stderr, err)
+	//os.Exit(1)
+	//}
 
-	m.StartGRPC()
-	m.StartHTTP()
+	//log.Fatal(m.Start())
 
 	//go func() {
 	//err := marabunta.StartGRPC(*grpcPort, *certFile, *keyFile)

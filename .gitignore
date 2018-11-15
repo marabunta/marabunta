@@ -8,3 +8,4 @@ coverage.*
 vendor
 docker/mysql/*
 docker/redis/*
+.envrc
