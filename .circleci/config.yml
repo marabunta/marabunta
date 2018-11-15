@@ -12,6 +12,7 @@ jobs:
     working_directory: /go/src/github.com/marabunta/marabunta
     steps:
       - checkout
+      - run: export GO111MODULE=auto
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: go get ./...
       - run: go test -race -v
