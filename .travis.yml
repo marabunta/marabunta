@@ -13,10 +13,10 @@ go:
 before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
+  - go get ./...
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 
 script:
-  - go build ./...
   - go build -o marabunta cmd/marabunta/main.go
   - go build -o ant cmd/ant/main.go
   - go test -v -covermode=count -coverprofile=coverage.out

@@ -13,7 +13,7 @@ jobs:
     steps:
       - checkout
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: go build ./...
+      - run: go get ./...
       - run: go test -race -v
   test-1.11:
     <<: *test-template
