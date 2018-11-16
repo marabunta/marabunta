@@ -19,7 +19,7 @@ var createTableStatements = []string{
 		id BINARY(16),
 		cdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		description VARCHAR(255),
-		payload JSON,
+		payload JSON NOT NULL,
 		PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
 	`CREATE TABLE IF NOT EXISTS tasks (
