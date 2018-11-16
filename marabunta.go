@@ -13,7 +13,8 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-type marabunta struct {
+// Marabunta struct
+type Marabunta struct {
 	db    *sql.DB
 	redis string
 }
@@ -52,17 +53,19 @@ func StartGRPC(port int, cert, key string) error {
 	return grpcServer.Serve(conn)
 }
 
-func New(c *Config) (*marabunta, error) {
+// New return a marabunta
+func New(c *Config) (*Marabunta, error) {
 	db, err := initMySQL(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &marabunta{
+	return &Marabunta{
 		db: db,
 	}, nil
 }
 
-func (m *marabunta) Start() error {
+// Start start the services
+func (m *Marabunta) Start() error {
 	return nil
 }
