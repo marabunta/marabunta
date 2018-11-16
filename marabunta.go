@@ -2,6 +2,7 @@ package marabunta
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net"
@@ -11,6 +12,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+type marabunta struct {
+	db    *sql.DB
+	redis string
+}
 
 // Server represents the gRPC server
 type Server struct {
@@ -44,4 +50,19 @@ func StartGRPC(port int, cert, key string) error {
 	go marabunta.Pulse()
 
 	return grpcServer.Serve(conn)
+}
+
+func New(c *Config) (*marabunta, error) {
+	db, err := initMySQL(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &marabunta{
+		db: db,
+	}, nil
+}
+
+func (m *marabunta) Start() error {
+	return nil
 }

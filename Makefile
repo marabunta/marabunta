@@ -1,20 +1,16 @@
-.PHONY: all deps test build cover cert
+.PHONY: all test build cover cert
 
 GO ?= go
 VERSION=$(shell git describe --tags --always)
 
 all: clean build
 
-deps:
-	${GO} get github.com/nbari/violetear
-	${GO} get github.com/nbari/violetear/middleware
-
-build: deps
+build:
 	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o marabunta cmd/marabunta/main.go;
 	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o ant cmd/ant/main.go;
 	# env GOOS=freebsd GOARCH=amd64 ${GO} build -ldflags "-s -w -X main.version=${VERSION}"
 
-test: deps
+test:
 	${GO} test -v
 
 clean:

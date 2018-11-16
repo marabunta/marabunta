@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/marabunta/marabunta"
@@ -26,15 +27,14 @@ func main() {
 		fmt.Printf("%s\n", version)
 		os.Exit(0)
 	}
-	fmt.Printf("cfg = %+v\n", cfg)
 
-	//m, err := marabunta.New(cfg)
-	//if err != nil {
-	//fmt.Fprintln(os.Stderr, err)
-	//os.Exit(1)
-	//}
+	m, err := marabunta.New(cfg)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
-	//log.Fatal(m.Start())
+	log.Fatal(m.Start())
 
 	//go func() {
 	//err := marabunta.StartGRPC(*grpcPort, *certFile, *keyFile)

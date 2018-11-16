@@ -13,9 +13,9 @@ type Config struct {
 type MySQL struct {
 	Host     string `yaml:"host"`
 	Port     uint   `yaml:"port"`
-	database string `yaml:"database"`
-	username string `yaml:"username"`
-	password string `yaml:"password"`
+	Database string `yaml:"database"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 // Redis configuration options
