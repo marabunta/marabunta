@@ -3,8 +3,8 @@ package marabunta
 // Flags available command flags
 type Flags struct {
 	Configfile string
-	GRPC       uint
-	HTTP       uint
+	GRPC       int
+	HTTP       int
 	Mysql      string
 	Redis      string
 	TLSCA      string

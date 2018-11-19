@@ -9,12 +9,15 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
+// TODO normalize & test
 var createTableStatements = []string{
+	// states
 	`CREATE TABLE IF NOT EXISTS states (
 		id TINYINT(2) NOT NULL AUTO_INCREMENT,
 		state VARCHAR(32) NOT NULL,
-		PRIMARY KEY (id)
+		PRIMARY KEY (id, state)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
+	// payloads
 	`CREATE TABLE IF NOT EXISTS payloads (
 		id BINARY(16),
 		cdate DATETIME NOT NULL,
@@ -25,6 +28,7 @@ var createTableStatements = []string{
 		PRIMARY KEY (id, hash),
 		UNIQUE KEY (hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
+	// tasks
 	`CREATE TABLE IF NOT EXISTS tasks (
 		id BINARY(16),
 		cdate DATETIME NOT NULL,
@@ -33,36 +37,32 @@ var createTableStatements = []string{
 		mdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		name VARCHAR(64),
 		payload_id binary(16),
-		retried TINYINT unsigned,
 		retries TINYINT unsigned DEFAULT 0,
 		schedule VARCHAR(64) NOT NULL,
-		sdate DATETIME,
-		state_id TINYINT(2),
 		target VARCHAR(255) NOT NULL,
 		type TINYINT(2) unsigned NOT NULL,
-		PRIMARY KEY (id),
+		PRIMARY KEY (id, name),
 		KEY (enabled),
-		KEY (name),
-		KEY (state_id),
 		FOREIGN KEY (payload_id)
 			REFERENCES payloads(id)
-			ON DELETE CASCADE,
-		FOREIGN KEY (state_id)
-			REFERENCES states(id)
+			ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
+	// jobs
 	`CREATE TABLE IF NOT EXISTS jobs (
 		id BINARY(16) NOT NULL,
 		task_id BINARY(16),
-		state_id TINYINT,
+		state_id TINYINT(2),
 		cdate DATETIME NOT NULL,
 		mdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-		PRIMARY KEY (id),
+		retried TINYINT unsigned,
+		PRIMARY KEY (id, task_id),
 		FOREIGN KEY (task_id)
 			REFERENCES tasks(id)
 			ON DELETE CASCADE,
 		FOREIGN KEY (state_id)
 			REFERENCES states(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
+	// messages
 	`CREATE TABLE IF NOT EXISTS messages (
 		id BINARY(16) NOT NULL,
 		job_id BINARY(16),
@@ -128,7 +128,7 @@ func populateTable(db *sql.DB) error {
 	var (
 		sqlStr      = "INSERT INTO states(state) VALUES "
 		sqlStrPstms []string
-		states      = []string{"todo", "queued", "running", "done", "error"}
+		states      = []string{"todo", "queued", "running", "done", "error", "delayed"}
 		vals        []interface{}
 	)
 	for _, row := range states {

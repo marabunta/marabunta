@@ -20,8 +20,8 @@ func (p *Parse) Parse(fs *flag.FlagSet) (*Flags, error) {
 	fs.StringVar(&p.Flags.Configfile, "c", "", "`marabunta.yml` configuration file")
 	fs.StringVar(&p.Flags.Mysql, "mysql", "", "MySQL `DSN` username:password@address:port/dbname")
 	fs.StringVar(&p.Flags.Redis, "redis", "", "Redis `host:port` (default 127.0.0.1:6379)")
-	fs.UintVar(&p.Flags.GRPC, "grpc", 1415, "Listen on gRPC `port` (default 1415)")
-	fs.UintVar(&p.Flags.HTTP, "http", 8000, "Listen on HTTP `port` (default 8000)")
+	fs.IntVar(&p.Flags.GRPC, "grpc", 1415, "Listen on gRPC `port` (default 1415)")
+	fs.IntVar(&p.Flags.HTTP, "http", 8000, "Listen on HTTP `port` (default 8000)")
 	fs.StringVar(&p.Flags.TLSCA, "tls.ca", "", "Path to TLS Certificate Authority (`CA`)")
 	fs.StringVar(&p.Flags.TLSCrt, "tls.crt", "", "Path to TLS `certificate`")
 	fs.StringVar(&p.Flags.TLSKey, "tls.key", "", "Path to TLS `private key`")
@@ -110,11 +110,11 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 	cfg := new(Config)
 
 	if flags.GRPC != 0 {
-		cfg.GRPCPort = uint(flags.GRPC)
+		cfg.GRPCPort = flags.GRPC
 	}
 
 	if flags.HTTP != 0 {
-		cfg.HTTPPort = uint(flags.HTTP)
+		cfg.HTTPPort = flags.HTTP
 	}
 
 	if flags.Mysql != "" {
