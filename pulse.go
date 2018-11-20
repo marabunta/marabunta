@@ -8,7 +8,7 @@ import (
 	pb "github.com/marabunta/protobuf"
 )
 
-func (s *Server) Pulse() {
+func (m *Marabunta) Pulse() {
 	send := func(ant, stream interface{}) bool {
 		log.Printf("ant = %+v\n", ant)
 		msg := &pb.StreamResponse{
@@ -28,7 +28,7 @@ func (s *Server) Pulse() {
 	for {
 		select {
 		case <-time.After(10 * time.Second):
-			s.marabunta.Range(send)
+			m.clients.Range(send)
 		}
 	}
 }

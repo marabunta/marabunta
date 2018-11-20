@@ -35,31 +35,4 @@ func main() {
 	}
 
 	log.Fatal(m.Start())
-
-	//go func() {
-	//err := marabunta.StartGRPC(*grpcPort, *certFile, *keyFile)
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-	//}()
-
-	//// start router
-	//router := violetear.New()
-	//router.Verbose = false
-	//router.LogRequests = true
-
-	//router.HandleFunc("/github/", github.Handler)
-
-	//// set version on healthCheck
-	//healthcheck.Version = version
-	//router.HandleFunc("/status", healthcheck.Handler)
-
-	//srv := &http.Server{
-	//Addr:           fmt.Sprintf(":%d", *httpPort),
-	//Handler:        router,
-	//ReadTimeout:    5 * time.Second,
-	//WriteTimeout:   7 * time.Second,
-	//MaxHeaderBytes: 1 << 20,
-	//}
-	//log.Fatal(srv.ListenAndServe())
 }

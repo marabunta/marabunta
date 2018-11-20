@@ -9,3 +9,4 @@ vendor
 docker/mysql/*
 docker/redis/*
 .envrc
+certs/*

@@ -7,6 +7,6 @@ import (
 )
 
 // Register register
-func (s *Server) Register(context.Context, *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (m *Marabunta) Register(context.Context, *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	return nil, nil
 }

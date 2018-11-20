@@ -9,19 +9,19 @@ import (
 )
 
 // Stream stream
-func (s *Server) Stream(stream pb.Marabunta_StreamServer) error {
+func (m *Marabunta) Stream(stream pb.Marabunta_StreamServer) error {
 	var ant string
 
 	if md, ok := metadata.FromIncomingContext(stream.Context()); ok {
 		log.Printf("md = %+v\n", md)
 		ant = md["ant"][0]
-		s.marabunta.Store(ant, stream)
+		m.clients.Store(ant, stream)
 	}
 
 	for {
 		in, err := stream.Recv()
 		if err != nil {
-			s.marabunta.Delete(ant)
+			m.clients.Delete(ant)
 			log.Printf("ant: %s, %s", ant, err)
 			return err
 		}
