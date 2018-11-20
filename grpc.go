@@ -2,8 +2,10 @@ package marabunta
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"net"
 	"sync"
 
@@ -22,16 +24,33 @@ func (s *Server) Update(ctx context.Context, update *pb.UpdateRequest) (*pb.Upda
 }
 
 // StartGRPC start gRPC server
-func StartGRPC(port int, cert, key string) error {
-	creds, err := credentials.NewServerTLSFromFile(cert, key)
+func StartGRPC(port int, ca, crt, key string) error {
+	cert, err := tls.LoadX509KeyPair(crt, key)
 	if err != nil {
-		log.Fatalf("could not load TLS keys: %s", err)
+		return err
 	}
 
-	// Create an array of gRPC options with the credentials
-	opts := []grpc.ServerOption{grpc.Creds(creds)}
+	CA, err := ioutil.ReadFile(ca)
+	if err != nil {
+		return fmt.Errorf("could not read CA certificate: %s", err)
+	}
 
-	grpcServer := grpc.NewServer(opts...)
+	// Append the client certificates from the CA
+	certPool := x509.NewCertPool()
+	if ok := certPool.AppendCertsFromPEM(CA); !ok {
+		return fmt.Errorf("failed to append client certs")
+	}
+
+	tlsConfig := &tls.Config{
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		Certificates: []tls.Certificate{cert},
+		ClientCAs:    certPool,
+	}
+
+	grpcServer := grpc.NewServer(
+		grpc.Creds(credentials.NewTLS(tlsConfig)),
+	)
+
 	marabunta := &Server{}
 	pb.RegisterMarabuntaServer(grpcServer, marabunta)
 
