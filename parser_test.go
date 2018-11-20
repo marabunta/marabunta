@@ -51,8 +51,8 @@ func TestParseDefault(t *testing.T) {
 	expect(t, "", flags.TLSCA)
 	expect(t, "", flags.TLSCrt)
 	expect(t, "", flags.TLSKey)
-	expect(t, uint(1415), flags.GRPC)
-	expect(t, uint(8000), flags.HTTP)
+	expect(t, int(1415), flags.GRPC)
+	expect(t, int(8000), flags.HTTP)
 	expect(t, false, flags.Version)
 }
 
