@@ -1,3 +1,4 @@
+---
 version: 2
 workflows:
   version: 2
@@ -14,6 +15,7 @@ jobs:
       - checkout
       - run: export GO111MODULE=on
       - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+      - run: make certs
       - run: go get ./...
       - run: go test -race -v
   test-1.11:
