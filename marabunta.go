@@ -64,13 +64,13 @@ func (m *Marabunta) Start() error {
 
 	pb.RegisterMarabuntaServer(m.gRPC, m)
 
-	// TODO events
-	go m.Pulse()
-
 	// start gRPC server
 	go func() {
 		log.Fatal(m.gRPC.Serve(conn))
 	}()
+
+	// TODO events
+	//	go m.Pulse()
 
 	// HTTP router
 	router := violetear.New()
