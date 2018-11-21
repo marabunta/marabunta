@@ -1,3 +1,4 @@
+---
 language: go
 
 os:
@@ -18,8 +19,8 @@ before_install:
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 
 script:
+  - make certs
   - go build -o marabunta cmd/marabunta/main.go
-  - go build -o ant cmd/ant/main.go
   - go test -v -covermode=count -coverprofile=coverage.out
   - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 
