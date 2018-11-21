@@ -3,6 +3,7 @@ package marabunta
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -24,7 +25,7 @@ func initGRPC(c *Config) (*grpc.Server, error) {
 	// Append the client certificates from the CA
 	caCertPool := x509.NewCertPool()
 	if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
-		return nil, fmt.Errorf("could not append CA certificate to cert pool")
+		return nil, errors.New("could not append CA certificate to cert pool")
 	}
 
 	tlsConfig := &tls.Config{

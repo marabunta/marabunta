@@ -5,15 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"sync"
-	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/marabunta/marabunta/pkg/github"
-	"github.com/marabunta/marabunta/pkg/healthcheck"
 	pb "github.com/marabunta/protobuf"
-	"github.com/nbari/violetear"
 	"google.golang.org/grpc"
 )
 
@@ -69,28 +64,11 @@ func (m *Marabunta) Start() error {
 		log.Fatal(m.gRPC.Serve(conn))
 	}()
 
-	// TODO events
-	//	go m.Pulse()
+	// TODO gRPC events
+	go m.Pulse()
 
-	// HTTP router
-	router := violetear.New()
-	router.Verbose = false
-	router.LogRequests = true
-
-	router.HandleFunc("/github/", github.Handler)
-
-	// set version on healthCheck
-	healthcheck.Version = "foo"
-	router.HandleFunc("/status", healthcheck.Handler)
-
-	srv := &http.Server{
-		Addr:           fmt.Sprintf(":%d", m.config.HTTPPort),
-		Handler:        router,
-		ReadTimeout:    5 * time.Second,
-		WriteTimeout:   7 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
+	log.Printf("Starting marabunta, listening on [HTTP *:%d] [gRPC *:%d]\n", m.config.HTTPPort, m.config.GRPCPort)
 
 	// start HTTP server
-	return srv.ListenAndServe()
+	return m.HTTP().ListenAndServe()
 }
