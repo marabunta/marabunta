@@ -219,9 +219,9 @@ redis:
   host: localhost
   port: 6379
 tls:
-  crt: /path/to/server.pem
-  key: /path/to/private.pem
-  ca: /path/to/CA.pem`)
+  crt: certs/server.crt
+  key: certs/server.key
+  ca: certs/CA.pem`)
 	err = ioutil.WriteFile(tmpfile.Name(), yaml, 0644)
 	if err != nil {
 		t.Error(err)

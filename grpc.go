@@ -1,13 +1,11 @@
 package marabunta
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 
-	pb "github.com/marabunta/protobuf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -38,8 +36,4 @@ func initGRPC(c *Config) (*grpc.Server, error) {
 	return grpc.NewServer(
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 	), nil
-}
-
-func (m *Marabunta) Update(ctx context.Context, update *pb.UpdateRequest) (*pb.UpdateResponse, error) {
-	return &pb.UpdateResponse{Ok: true}, nil
 }

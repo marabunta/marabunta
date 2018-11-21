@@ -18,8 +18,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/marabunta/protobuf v0.0.0-20181113224003-07f1371b20e5 h1:L3o3UARQRZmOhz7pPGbM2TnGi46IPnA2yka/3ZGVQDI=
-github.com/marabunta/protobuf v0.0.0-20181113224003-07f1371b20e5/go.mod h1:h5hW+kQLPcDm5Ta/0YQAtakH732E6VIzKGCK2gLcuOw=
+github.com/marabunta/protobuf v0.0.0-20181116174652-00e6ce3739ee h1:M8hcmSS+ICkAQFD4WRrJyFwUcgBMzleZeAlh/Y+AQws=
+github.com/marabunta/protobuf v0.0.0-20181116174652-00e6ce3739ee/go.mod h1:h5hW+kQLPcDm5Ta/0YQAtakH732E6VIzKGCK2gLcuOw=
 github.com/nbari/violetear v0.0.0-20180912134303-b8e1276ca190 h1:Rk9swldDkOMxgl9yvHfSSQKH2/RqcZWE8iLQnarVxkQ=
 github.com/nbari/violetear v0.0.0-20180912134303-b8e1276ca190/go.mod h1:UrL3qDiO/LwC9HbVuujfjLbqyvP4DzuMLvUk4PfwZx8=
 golang.org/x/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
