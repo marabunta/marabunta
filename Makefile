@@ -10,7 +10,6 @@ endif
 
 build:
 	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o marabunta cmd/marabunta/main.go;
-	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o ant cmd/ant/main.go;
 	# env GOOS=freebsd GOARCH=amd64 ${GO} build -ldflags "-s -w -X main.version=${VERSION}"
 
 test:

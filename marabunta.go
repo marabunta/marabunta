@@ -3,6 +3,7 @@ package marabunta
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -21,7 +22,6 @@ type Marabunta struct {
 	clients sync.Map
 	config  *Config
 	db      *sql.DB
-	errc    chan error
 	gRPC    *grpc.Server
 	redis   *redis.Pool
 }
@@ -49,7 +49,6 @@ func New(c *Config) (*Marabunta, error) {
 	return &Marabunta{
 		config: c,
 		db:     db,
-		errc:   make(chan error),
 		gRPC:   gRPC,
 		redis:  redis,
 	}, nil
@@ -68,11 +67,12 @@ func (m *Marabunta) Start() error {
 	// TODO events
 	go m.Pulse()
 
+	// start gRPC server
 	go func() {
-		m.errc <- m.gRPC.Serve(conn)
+		log.Fatal(m.gRPC.Serve(conn))
 	}()
 
-	// start HTTP router
+	// HTTP router
 	router := violetear.New()
 	router.Verbose = false
 	router.LogRequests = true
@@ -90,15 +90,7 @@ func (m *Marabunta) Start() error {
 		WriteTimeout:   7 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-	fmt.Printf("srv = %+v\n", srv)
 
-	// TODO
-	select {
-	case err := <-m.errc:
-		return err
-	case <-time.After(1 * time.Second):
-		return fmt.Errorf("TODO....")
-		//	default:
-		//		return srv.ListenAndServe()
-	}
+	// start HTTP server
+	return srv.ListenAndServe()
 }

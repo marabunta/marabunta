@@ -77,12 +77,13 @@ var createTableStatements = []string{
 
 func initMySQL(c *Config) (*sql.DB, error) {
 	// test MySQL connection
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+	DSN := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		c.MySQL.Username,
 		c.MySQL.Password,
 		c.MySQL.Host,
 		c.MySQL.Port,
-		c.MySQL.Database))
+		c.MySQL.Database)
+	db, err := sql.Open("mysql", DSN)
 	if err != nil {
 		return nil, fmt.Errorf("mysql: Error on initializing database connection: %s", err.Error())
 	}
