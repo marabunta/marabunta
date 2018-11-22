@@ -27,10 +27,13 @@ certs: SHELL:=/bin/bash
 certs:
 	@mkdir -p certs
 	# crate CA
-	openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout certs/CA.key -out certs/CA.pem -subj "/CN=marabunta.host" -days 365
-	# create server certs
-	openssl req -newkey rsa:2048 -sha256 -nodes -keyout certs/server.key -out certs/server.csr -subj "/CN=marabunta.host"
-	openssl x509 -days 3065 -sha256 -req -in certs/server.csr -CA certs/CA.pem -CAkey certs/CA.key -set_serial 01 -out certs/server.crt -extfile <(printf "subjectAltName = DNS:localhost,DNS:marabunta.host,IP:127.0.0.1,IP:0.0.0.0")
-	# create client certs
-	openssl req -newkey rsa:2048 -sha256 -nodes -keyout certs/client.key -out certs/client.csr -subj "/CN=client.marabunta.host"
-	openssl x509 -days 3065 -sha256 -req -in certs/client.csr -CA certs/CA.pem -CAkey certs/CA.key -set_serial 01 -out certs/client.crt -extfile <(printf "subjectAltName = DNS:localhost,DNS:client.marabunta.host,IP:127.0.0.1,IP:0.0.0.0")
+	openssl ecparam -genkey -name prime256v1 -out certs/CA.key
+	openssl req -x509 -new -SHA256 -nodes -key certs/CA.key -out certs/CA.crt -subj "/CN=marabunta.host" -days 3650
+	# create server cert and sign it with the CA
+	openssl ecparam -genkey -name prime256v1 -out certs/server.key
+	openssl req -new -SHA256 -key certs/server.key -nodes -out certs/server.csr -subj "/CN=marabunta.host"
+	openssl x509 -days 3065 -sha256 -req -in certs/server.csr -CA certs/CA.crt -CAkey certs/CA.key -set_serial 01 -out certs/server.crt
+	# create client cert and sign it with the CA
+	openssl ecparam -genkey -name prime256v1 -out certs/client.key
+	openssl req -new -SHA256 -key certs/server.key -nodes -out certs/client.csr -subj "/CN=ant.marabunta.host"
+	openssl x509 -days 3065 -sha256 -req -in certs/client.csr -CA certs/CA.crt -CAkey certs/CA.key -set_serial 01 -out certs/client.crt
