@@ -5,19 +5,19 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/marabunta/marabunta/http/certificate"
 	"github.com/marabunta/marabunta/http/healthcheck"
+	"github.com/marabunta/marabunta/http/register"
 	"github.com/nbari/violetear"
 )
 
-// Start start the services
+// HTTP returns http router
 func (m *Marabunta) HTTP() *http.Server {
 	// HTTP router
 	router := violetear.New()
 	router.Verbose = false
 	router.LogRequests = true
 
-	router.HandleFunc("/certificate/", certificate.Handler)
+	router.HandleFunc("/register/", register.POST, "POST")
 
 	// set version on healthCheck
 	healthcheck.Version = "foo"
