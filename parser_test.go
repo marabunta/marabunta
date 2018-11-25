@@ -221,7 +221,7 @@ redis:
 tls:
   crt: certs/server.crt
   key: certs/server.key
-  ca: certs/CA.pem`)
+  ca: certs/CA.crt`)
 	err = ioutil.WriteFile(tmpfile.Name(), yaml, 0644)
 	if err != nil {
 		t.Error(err)

@@ -1,4 +1,4 @@
-.PHONY: all test build cover certs
+.PHONY: all test build clean cover certs
 
 GO ?= go
 VERSION=$(shell git describe --tags --always)
