@@ -22,6 +22,7 @@ func (m *Marabunta) HTTP() *http.Server {
 	// set version on healthCheck
 	healthcheck.Version = "foo"
 	router.HandleFunc("/status", healthcheck.Handler)
+	router.HandleFunc("/ca", m.HTTPCA)
 
 	srv := &http.Server{
 		Addr:           fmt.Sprintf(":%d", m.config.HTTPPort),
