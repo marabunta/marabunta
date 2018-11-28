@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// HTTPCA
+// HTTPCA http handler sending the CA
 func (m *Marabunta) HTTPCA(w http.ResponseWriter, r *http.Request) {
 	ca, err := ioutil.ReadFile(m.config.TLS.CA)
 	if err != nil {
