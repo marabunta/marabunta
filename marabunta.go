@@ -70,5 +70,5 @@ func (m *Marabunta) Start() error {
 	log.Printf("Starting marabunta, listening on [HTTP *:%d] [gRPC *:%d]\n", m.config.HTTPPort, m.config.GRPCPort)
 
 	// start HTTP server
-	return m.HTTP().ListenAndServe()
+	return m.HTTP().ListenAndServeTLS(m.config.TLS.Crt, m.config.TLS.Key)
 }
