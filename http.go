@@ -1,14 +1,16 @@
 package marabunta
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/marabunta/marabunta/http/healthcheck"
-	"github.com/marabunta/marabunta/http/register"
 	"github.com/nbari/violetear"
 )
 
@@ -19,12 +21,11 @@ func (m *Marabunta) HTTP() *http.Server {
 	router.Verbose = false
 	router.LogRequests = true
 
-	router.HandleFunc("/register/", register.POST, "POST")
+	router.HandleFunc("/register", m.register, "POST")
 
 	// set version on healthCheck
 	healthcheck.Version = "foo"
 	router.HandleFunc("/status", healthcheck.Handler)
-	router.HandleFunc("/ca", m.httpCA, "GET")
 
 	srv := &http.Server{
 		Addr:           fmt.Sprintf(":%d", m.config.HTTPPort),
@@ -37,13 +38,32 @@ func (m *Marabunta) HTTP() *http.Server {
 	return srv
 }
 
-func (m *Marabunta) httpCA(w http.ResponseWriter, r *http.Request) {
-	ca, err := ioutil.ReadFile(m.config.TLS.CA)
+func (m *Marabunta) register(w http.ResponseWriter, r *http.Request) {
+	csr, err := ioutil.ReadAll(io.LimitReader(r.Body, 4096))
 	if err != nil {
-		log.Printf("HTTP CA error: %s\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/x-x509-ca-cert")
-	w.Write(ca)
+
+	pemBlock, _ := pem.Decode(csr)
+	if pemBlock == nil {
+		http.Error(w, "could not parse csr", http.StatusUnprocessableEntity)
+		return
+	}
+
+	clientCSR, err := x509.ParseCertificateRequest(pemBlock.Bytes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err = clientCSR.CheckSignature(); err != nil {
+		http.Error(w, err.Error(), http.StatusNotAcceptable)
+		return
+	}
+
+	log.Printf("clientCSR = %s\n", clientCSR)
+
+	//w.Header().Set("Content-Type", "application/x-x509-ca-cert")
+	//w.Write(ca)
 }
