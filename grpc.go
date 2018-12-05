@@ -17,9 +17,9 @@ func initGRPC(c *Config) (*grpc.Server, error) {
 		return nil, err
 	}
 
-	caCert, err := ioutil.ReadFile(c.TLS.CA)
+	caCert, err := ioutil.ReadFile(c.TLS.CACrt)
 	if err != nil {
-		return nil, fmt.Errorf("could not read CA certificate from file %q, %s", c.TLS.CA, err)
+		return nil, fmt.Errorf("could not read CA certificate from file %q, %s", c.TLS.CACrt, err)
 	}
 
 	// Append the client certificates from the CA

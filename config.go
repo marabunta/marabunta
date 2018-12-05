@@ -26,7 +26,8 @@ type Redis struct {
 
 // TLS configuration options
 type TLS struct {
-	Crt string `yaml:"crt"`
-	Key string `yaml:"key"`
-	CA  string `yaml:"ca"`
+	Crt   string `yaml:"crt"`
+	Key   string `yaml:"key"`
+	CACrt string `yaml:"ca_crt"`
+	CAKey string `yaml:"ca_key"`
 }

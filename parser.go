@@ -100,9 +100,9 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		}
 
 		// TLS CA
-		if cfg.TLS.CA != "" {
-			if !isFile(cfg.TLS.CA) {
-				return nil, fmt.Errorf("cannot read TLS CA file: %q, use (\"%s -h\") for help", cfg.TLS.CA, os.Args[0])
+		if cfg.TLS.CACrt != "" {
+			if !isFile(cfg.TLS.CACrt) {
+				return nil, fmt.Errorf("cannot read TLS CA file: %q, use (\"%s -h\") for help", cfg.TLS.CACrt, os.Args[0])
 			}
 		} else {
 			return nil, fmt.Errorf("missing TLS CA, use (\"%s -h\") for help", os.Args[0])
@@ -163,7 +163,7 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		if !isFile(flags.TLSCA) {
 			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSCA, os.Args[0])
 		}
-		tls.CA = flags.TLSCA
+		tls.CACrt = flags.TLSCA
 	} else {
 		return nil, fmt.Errorf("missing TLS CA, use (\"%s -h\") for help", os.Args[0])
 	}

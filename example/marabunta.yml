@@ -14,4 +14,5 @@ redis:
 tls:
   crt: certs/server.crt
   key: certs/server.key
-  ca: certs/CA.crt
+  ca_crt: certs/CA.crt
+  ca_key: certs/CA.key
