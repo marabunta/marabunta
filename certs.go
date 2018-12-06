@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"math/big"
 	"path/filepath"
@@ -41,13 +42,7 @@ func createCertificates(cfg *Config) error {
 		return err
 	}
 
-	block := &pem.Block{
-		Type: "CERTIFICATE",
-		Headers: map[string]string{
-			"CA": "marabunta",
-		},
-		Bytes: caCrt,
-	}
+	block := &pem.Block{Type: "CERTIFICATE", Bytes: caCrt}
 	err = ioutil.WriteFile(filepath.Join(cfg.Home, "CA.crt"), pem.EncodeToMemory(block), 0644)
 	if err != nil {
 		return err
@@ -64,5 +59,5 @@ func createCertificates(cfg *Config) error {
 		return err
 	}
 
-	return nil
+	return fmt.Errorf("ok.....")
 }

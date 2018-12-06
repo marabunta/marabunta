@@ -1,0 +1,11 @@
+# marabunta configuration file
+---
+mysql:
+  host: localhost
+  port: 3306
+  database: marabunta
+  username: root
+  password: example
+redis:
+  host: localhost
+  port: 6379
