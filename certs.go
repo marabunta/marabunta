@@ -41,7 +41,13 @@ func createCertificates(cfg *Config) error {
 		return err
 	}
 
-	block := &pem.Block{Type: "CERTIFICATE", Bytes: caCrt}
+	block := &pem.Block{
+		Type: "CERTIFICATE",
+		Headers: map[string]string{
+			"CA": "marabunta",
+		},
+		Bytes: caCrt,
+	}
 	err = ioutil.WriteFile(filepath.Join(cfg.Home, "CA.crt"), pem.EncodeToMemory(block), 0644)
 	if err != nil {
 		return err
