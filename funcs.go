@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
+	"path/filepath"
 )
 
 // md5sum return md5 checksum of given file
@@ -53,4 +55,21 @@ func isFile(path string) bool {
 		return true
 	}
 	return false
+}
+
+// GetHome returns the $HOME/.marabunta
+func GetHome() (string, error) {
+	home := os.Getenv("HOME")
+	if home == "" {
+		usr, err := user.Current()
+		if err != nil {
+			return "", fmt.Errorf("error getting user home: %s", err)
+		}
+		home = usr.HomeDir
+	}
+	home = filepath.Join(home, ".marabunta")
+	if err := os.MkdirAll(home, os.ModePerm); err != nil {
+		return "", err
+	}
+	return home, nil
 }

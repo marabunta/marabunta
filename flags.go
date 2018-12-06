@@ -7,7 +7,8 @@ type Flags struct {
 	HTTP       int
 	Mysql      string
 	Redis      string
-	TLSCA      string
+	TLSCACrt   string
+	TLSCAKey   string
 	TLSCrt     string
 	TLSKey     string
 	Version    bool

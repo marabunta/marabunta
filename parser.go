@@ -22,9 +22,6 @@ func (p *Parse) Parse(fs *flag.FlagSet) (*Flags, error) {
 	fs.StringVar(&p.Flags.Redis, "redis", "", "Redis `host:port` (default 127.0.0.1:6379)")
 	fs.IntVar(&p.Flags.GRPC, "grpc", 1415, "Listen on gRPC `port` (default 1415)")
 	fs.IntVar(&p.Flags.HTTP, "http", 8000, "Listen on HTTP `port` (default 8000)")
-	fs.StringVar(&p.Flags.TLSCA, "tls.ca", "", "Path to TLS Certificate Authority (`CA`)")
-	fs.StringVar(&p.Flags.TLSCrt, "tls.crt", "", "Path to TLS `certificate`")
-	fs.StringVar(&p.Flags.TLSKey, "tls.key", "", "Path to TLS `private key`")
 
 	err := fs.Parse(os.Args[1:])
 	if err != nil {
@@ -33,20 +30,15 @@ func (p *Parse) Parse(fs *flag.FlagSet) (*Flags, error) {
 	return &p.Flags, nil
 }
 
-func (p *Parse) parseYml(file string) (*Config, error) {
+func (p *Parse) parseYml(file string, cfg *Config) (*Config, error) {
 	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
-	// set defaults
-	var cfg = Config{
-		HTTPPort: 8000,
-		GRPCPort: 1415,
-	}
 	if err := yaml.Unmarshal(f, &cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse YAML file %q %s", file, err)
 	}
-	return &cfg, nil
+	return cfg, nil
 }
 
 // Usage prints to standard error a usage message
@@ -87,6 +79,14 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		return nil, nil
 	}
 
+	var (
+		needCertificate bool
+		cfg             = &Config{
+			HTTPPort: 8000,
+			GRPCPort: 1415,
+		}
+	)
+
 	// if -c
 	if flags.Configfile != "" {
 		if !isFile(flags.Configfile) {
@@ -94,18 +94,36 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		}
 
 		// parse the `run.yml` file
-		cfg, err := p.parseYml(flags.Configfile)
+		cfg, err := p.parseYml(flags.Configfile, cfg)
 		if err != nil {
 			return nil, err
 		}
 
-		// TLS CA
+		// Home
+		if cfg.Home == "" {
+			home, err := GetHome()
+			if err != nil {
+				return nil, err
+			}
+			cfg.Home = home
+		}
+
+		// TLS CA crt
 		if cfg.TLS.CACrt != "" {
 			if !isFile(cfg.TLS.CACrt) {
-				return nil, fmt.Errorf("cannot read TLS CA file: %q, use (\"%s -h\") for help", cfg.TLS.CACrt, os.Args[0])
+				return nil, fmt.Errorf("cannot read TLS CA crt file: %q, use (\"%s -h\") for help", cfg.TLS.CACrt, os.Args[0])
 			}
 		} else {
-			return nil, fmt.Errorf("missing TLS CA, use (\"%s -h\") for help", os.Args[0])
+			needCertificate = true
+		}
+
+		// TLS CA key
+		if cfg.TLS.CAKey != "" {
+			if !isFile(cfg.TLS.CAKey) {
+				return nil, fmt.Errorf("cannot read TLS CA key file: %q, use (\"%s -h\") for help", cfg.TLS.CAKey, os.Args[0])
+			}
+		} else {
+			needCertificate = true
 		}
 
 		// TLS certificate
@@ -114,7 +132,7 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 				return nil, fmt.Errorf("cannot read TLS crt file: %q, use (\"%s -h\") for help", cfg.TLS.Crt, os.Args[0])
 			}
 		} else {
-			return nil, fmt.Errorf("missing TLS certificate, use (\"%s -h\") for help", os.Args[0])
+			needCertificate = true
 		}
 
 		// TLS KEY
@@ -123,7 +141,14 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 				return nil, fmt.Errorf("cannot read TLS Key file: %q, use (\"%s -h\") for help", cfg.TLS.Key, os.Args[0])
 			}
 		} else {
-			return nil, fmt.Errorf("missing TLS Key, use (\"%s -h\") for help", os.Args[0])
+			needCertificate = true
+		}
+
+		if needCertificate {
+			err := createCertificates(cfg)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		return cfg, nil
@@ -133,8 +158,12 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		return nil, fmt.Errorf("missing options, use (\"%s -h\") for help", os.Args[0])
 	}
 
-	// create new cfg if not using -c
-	cfg := new(Config)
+	home, err := GetHome()
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.Home = home
 
 	if flags.GRPC != 0 {
 		cfg.GRPCPort = flags.GRPC
@@ -156,39 +185,9 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		cfg.Redis = Redis{"127.0.0.1", 6379}
 	}
 
-	tls := TLS{}
-
-	// TLS CA
-	if flags.TLSCA != "" {
-		if !isFile(flags.TLSCA) {
-			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSCA, os.Args[0])
-		}
-		tls.CACrt = flags.TLSCA
-	} else {
-		return nil, fmt.Errorf("missing TLS CA, use (\"%s -h\") for help", os.Args[0])
+	if err := createCertificates(cfg); err != nil {
+		return nil, err
 	}
-
-	// TLS certificate
-	if flags.TLSCrt != "" {
-		if !isFile(flags.TLSCrt) {
-			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSCrt, os.Args[0])
-		}
-		tls.Crt = flags.TLSCrt
-	} else {
-		return nil, fmt.Errorf("missing TLS certificate, use (\"%s -h\") for help", os.Args[0])
-	}
-
-	// TLS KEY
-	if flags.TLSKey != "" {
-		if !isFile(flags.TLSKey) {
-			return nil, fmt.Errorf("cannot read file: %q, use (\"%s -h\") for help", flags.TLSKey, os.Args[0])
-		}
-		tls.Key = flags.TLSKey
-	} else {
-		return nil, fmt.Errorf("missing TLS Key, use (\"%s -h\") for help", os.Args[0])
-	}
-
-	cfg.TLS = tls
 
 	return cfg, nil
 }
