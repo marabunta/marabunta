@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
 	"math/big"
 	"path/filepath"
@@ -15,7 +14,6 @@ import (
 )
 
 func createCertificates(cfg *Config) error {
-	// create client certificate template
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().Unix()),
 		Subject: pkix.Name{
@@ -35,9 +33,7 @@ func createCertificates(cfg *Config) error {
 		return err
 	}
 
-	pub := &priv.PublicKey
-
-	caCrt, err := x509.CreateCertificate(rand.Reader, ca, ca, pub, priv)
+	caCrt, err := x509.CreateCertificate(rand.Reader, ca, ca, &priv.PublicKey, priv)
 	if err != nil {
 		return err
 	}
@@ -59,5 +55,45 @@ func createCertificates(cfg *Config) error {
 		return err
 	}
 
-	return fmt.Errorf("ok.....")
+	// server certificate
+	server := &x509.Certificate{
+		SerialNumber: big.NewInt(time.Now().Unix()),
+		Subject: pkix.Name{
+			Organization: []string{"marabunta"},
+			CommonName:   "HTTP",
+		},
+		NotBefore:   time.Now(),
+		NotAfter:    time.Now().AddDate(3, 0, 0),
+		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+
+	priv, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return err
+	}
+
+	serverCrt, err := x509.CreateCertificate(rand.Reader, server, server, &priv.PublicKey, priv)
+	if err != nil {
+		return err
+	}
+
+	block = &pem.Block{Type: "CERTIFICATE", Bytes: serverCrt}
+	err = ioutil.WriteFile(filepath.Join(cfg.Home, "server.crt"), pem.EncodeToMemory(block), 0644)
+	if err != nil {
+		return err
+	}
+
+	privKey, err = x509.MarshalECPrivateKey(priv)
+	if err != nil {
+		return err
+	}
+
+	block = &pem.Block{Type: "PRIVATE KEY", Bytes: privKey}
+	err = ioutil.WriteFile(filepath.Join(cfg.Home, "server.key"), pem.EncodeToMemory(block), 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

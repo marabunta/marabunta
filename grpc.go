@@ -12,7 +12,7 @@ import (
 )
 
 func initGRPC(c *Config) (*grpc.Server, error) {
-	cert, err := tls.LoadX509KeyPair(c.TLS.Crt, c.TLS.Key)
+	cert, err := tls.LoadX509KeyPair(c.TLS.CACrt, c.TLS.CAKey)
 	if err != nil {
 		return nil, err
 	}
