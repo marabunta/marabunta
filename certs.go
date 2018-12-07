@@ -9,11 +9,27 @@ import (
 	"encoding/pem"
 	"io/ioutil"
 	"math/big"
-	"path/filepath"
 	"time"
 )
 
 func createCertificates(cfg *Config) error {
+	var do bool
+	if !isFile(cfg.TLS.CACrt) {
+		do = true
+	}
+	if !isFile(cfg.TLS.CAKey) {
+		do = true
+	}
+	if !isFile(cfg.TLS.Key) {
+		do = true
+	}
+	if !isFile(cfg.TLS.Crt) {
+		do = true
+	}
+	if !do {
+		return nil
+	}
+
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().Unix()),
 		Subject: pkix.Name{
@@ -39,7 +55,7 @@ func createCertificates(cfg *Config) error {
 	}
 
 	block := &pem.Block{Type: "CERTIFICATE", Bytes: caCrt}
-	err = ioutil.WriteFile(filepath.Join(cfg.Home, "CA.crt"), pem.EncodeToMemory(block), 0644)
+	err = ioutil.WriteFile(cfg.TLS.CACrt, pem.EncodeToMemory(block), 0644)
 	if err != nil {
 		return err
 	}
@@ -50,7 +66,7 @@ func createCertificates(cfg *Config) error {
 	}
 
 	block = &pem.Block{Type: "PRIVATE KEY", Bytes: privKey}
-	err = ioutil.WriteFile(filepath.Join(cfg.Home, "CA.key"), pem.EncodeToMemory(block), 0644)
+	err = ioutil.WriteFile(cfg.TLS.CAKey, pem.EncodeToMemory(block), 0644)
 	if err != nil {
 		return err
 	}
@@ -79,7 +95,7 @@ func createCertificates(cfg *Config) error {
 	}
 
 	block = &pem.Block{Type: "CERTIFICATE", Bytes: serverCrt}
-	err = ioutil.WriteFile(filepath.Join(cfg.Home, "server.crt"), pem.EncodeToMemory(block), 0644)
+	err = ioutil.WriteFile(cfg.TLS.Crt, pem.EncodeToMemory(block), 0644)
 	if err != nil {
 		return err
 	}
@@ -90,10 +106,5 @@ func createCertificates(cfg *Config) error {
 	}
 
 	block = &pem.Block{Type: "PRIVATE KEY", Bytes: privKey}
-	err = ioutil.WriteFile(filepath.Join(cfg.Home, "server.key"), pem.EncodeToMemory(block), 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ioutil.WriteFile(cfg.TLS.Key, pem.EncodeToMemory(block), 0644)
 }

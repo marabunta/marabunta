@@ -135,7 +135,7 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 				return nil, fmt.Errorf("cannot read TLS crt file: %q, use (\"%s -h\") for help", cfg.TLS.Crt, os.Args[0])
 			}
 		} else {
-			cfg.TLS.Crt = filepath.Join(cfg.Home, "server.crt")
+			cfg.TLS.Crt = filepath.Join(cfg.Home, "http.crt")
 			needCertificate = true
 		}
 
@@ -145,7 +145,7 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 				return nil, fmt.Errorf("cannot read TLS Key file: %q, use (\"%s -h\") for help", cfg.TLS.Key, os.Args[0])
 			}
 		} else {
-			cfg.TLS.Key = filepath.Join(cfg.Home, "server.key")
+			cfg.TLS.Key = filepath.Join(cfg.Home, "http.key")
 			needCertificate = true
 		}
 
@@ -189,8 +189,28 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 		cfg.Redis = Redis{"127.0.0.1", 6379}
 	}
 
-	if err := createCertificates(cfg); err != nil {
-		return nil, err
+	// check if certs already exists
+	cfg.TLS.CACrt = filepath.Join(cfg.Home, "CA.crt")
+	if !isFile(cfg.TLS.CACrt) {
+		needCertificate = true
+	}
+	cfg.TLS.CAKey = filepath.Join(cfg.Home, "CA.key")
+	if !isFile(cfg.TLS.CAKey) {
+		needCertificate = true
+	}
+	cfg.TLS.Key = filepath.Join(cfg.Home, "http.key")
+	if !isFile(cfg.TLS.Key) {
+		needCertificate = true
+	}
+	cfg.TLS.Crt = filepath.Join(cfg.Home, "http.crt")
+	if !isFile(cfg.TLS.Crt) {
+		needCertificate = true
+	}
+
+	if needCertificate {
+		if err := createCertificates(cfg); err != nil {
+			return nil, err
+		}
 	}
 
 	return cfg, nil
