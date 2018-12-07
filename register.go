@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
-	"path/filepath"
 	"time"
 )
 
@@ -40,9 +39,7 @@ func (m *Marabunta) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// How good could it be to read only once and keep it in memory ?
-	// by reading every time the certs could be updated without restarting
-	caFile, err := ioutil.ReadFile(filepath.Join(m.config.Home, m.config.TLS.CACrt))
+	caFile, err := ioutil.ReadFile(m.config.TLS.CACrt)
 	if err != nil {
 		// 500
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,14 +60,21 @@ func (m *Marabunta) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	caPrivateKeyFile, err := ioutil.ReadFile(filepath.Join(m.config.Home, m.config.TLS.CAKey))
+	caPrivateKeyFile, err := ioutil.ReadFile(m.config.TLS.CAKey)
 	if err != nil {
 		// 500
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	caPrivateKey, err := x509.ParseECPrivateKey(caPrivateKeyFile)
+	pemBlock, _ = pem.Decode(caPrivateKeyFile)
+	if pemBlock == nil {
+		// 500
+		http.Error(w, "could not parse CA.key", http.StatusInternalServerError)
+		return
+	}
+
+	caPrivateKey, err := x509.ParseECPrivateKey(pemBlock.Bytes)
 	if err != nil {
 		// 500
 		http.Error(w, err.Error(), http.StatusInternalServerError)
