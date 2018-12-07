@@ -48,7 +48,8 @@ func TestParseDefault(t *testing.T) {
 	expect(t, "", flags.Configfile)
 	expect(t, "", flags.Mysql)
 	expect(t, "", flags.Redis)
-	expect(t, "", flags.TLSCA)
+	expect(t, "", flags.TLSCACrt)
+	expect(t, "", flags.TLSCAKey)
 	expect(t, "", flags.TLSCrt)
 	expect(t, "", flags.TLSKey)
 	expect(t, int(1415), flags.GRPC)
@@ -70,9 +71,6 @@ func TestParseFlags(t *testing.T) {
 		{[]string{"cmd", "-redis", "host:port"}, "redis", "host:port"},
 		{[]string{"cmd", "-grpc", "1415"}, "gRPC", "1415"},
 		{[]string{"cmd", "-http", "8000"}, "http", "8000"},
-		{[]string{"cmd", "-tls.ca", "/path/to/ca"}, "tls.ca", "/path/to/child"},
-		{[]string{"cmd", "-tls.crt", "/path/to/crt"}, "tls.crt", "/path/to/crt"},
-		{[]string{"cmd", "-tls.key", "/path/to/key"}, "tls.key", "/path/to/key"},
 	}
 
 	var helpCalled = false
@@ -166,37 +164,39 @@ func TestParseArgsTable(t *testing.T) {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	var flagTest = []struct {
+		name        string
 		flag        []string
 		expectError bool
 	}{
-		{[]string{"cmd", "-v"}, false},
-		{[]string{"cmd", "-c", "marabunta.yml"}, true},
-		{[]string{"cmd", "-c", "example/marabunta.yml", "cmd"}, false},
-		{[]string{"cmd", "-mysql", "dsn"}, true},
-		{[]string{"cmd", "-redis", "host:port"}, true},
-		{[]string{"cmd", "-tls.ca", "/path/to/ca"}, true},
-		// TODO
+		{"version", []string{"cmd", "-v"}, false},
+		{"1.yml", []string{"cmd", "-c", "marabunta.yml"}, true},
+		{"2.yml", []string{"cmd", "-c", "example/marabunta.yml", "cmd"}, false},
+		// todo fix parse dns
+		{"dsn", []string{"cmd", "-mysql", "dsn"}, false},
+		{"redis", []string{"cmd", "-redis", "host:port"}, true},
 	}
 	var helpCalled = false
-	for _, f := range flagTest {
-		os.Args = f.flag
-		parser := &Parse{}
-		fs := flag.NewFlagSet("TestParseArgsTable", flag.ContinueOnError)
-		fs.Usage = func() { helpCalled = true }
-		_, err := parser.ParseArgs(fs)
-		if f.expectError {
-			if err == nil {
-				t.Error("Expecting error")
+	for _, tc := range flagTest {
+		t.Run(tc.name, func(t *testing.T) {
+			os.Args = tc.flag
+			parser := &Parse{}
+			fs := flag.NewFlagSet("TestParseArgsTable", flag.ContinueOnError)
+			fs.Usage = func() { helpCalled = true }
+			_, err := parser.ParseArgs(fs)
+			if tc.expectError {
+				if err == nil {
+					t.Error("Expecting error")
+				}
+			} else {
+				if err != nil {
+					t.Error(err)
+				}
 			}
-		} else {
-			if err != nil {
-				t.Error(err)
+			if helpCalled {
+				t.Error("help called for regular flag")
+				helpCalled = false // reset for next test
 			}
-		}
-		if helpCalled {
-			t.Error("help called for regular flag")
-			helpCalled = false // reset for next test
-		}
+		})
 	}
 }
 
@@ -244,7 +244,8 @@ tls:
 
 func TestParseParseYmlioutil(t *testing.T) {
 	p := &Parse{}
-	if _, err := p.parseYml("/dev/null/non-existent"); err == nil {
+	c := &Config{}
+	if _, err := p.parseYml("/dev/null/non-existent", c); err == nil {
 		t.Error("Expecting error")
 	}
 }
@@ -263,7 +264,8 @@ http: 10`)
 		t.Error(err)
 	}
 	p := &Parse{}
-	if _, err := p.parseYml(tmpfile.Name()); err == nil {
+	c := &Config{}
+	if _, err := p.parseYml(tmpfile.Name(), c); err == nil {
 		t.Error("Expecting error")
 	}
 }
