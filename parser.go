@@ -135,7 +135,7 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 				return nil, fmt.Errorf("cannot read TLS crt file: %q, use (\"%s -h\") for help", cfg.TLS.Crt, os.Args[0])
 			}
 		} else {
-			cfg.TLS.Crt = filepath.Join(cfg.Home, "http.crt")
+			cfg.TLS.Crt = filepath.Join(cfg.Home, "marabunta.crt")
 			needCertificate = true
 		}
 
@@ -145,7 +145,7 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 				return nil, fmt.Errorf("cannot read TLS Key file: %q, use (\"%s -h\") for help", cfg.TLS.Key, os.Args[0])
 			}
 		} else {
-			cfg.TLS.Key = filepath.Join(cfg.Home, "http.key")
+			cfg.TLS.Key = filepath.Join(cfg.Home, "marabunta.key")
 			needCertificate = true
 		}
 
@@ -198,11 +198,11 @@ func (p *Parse) ParseArgs(fs *flag.FlagSet) (*Config, error) {
 	if !isFile(cfg.TLS.CAKey) {
 		needCertificate = true
 	}
-	cfg.TLS.Key = filepath.Join(cfg.Home, "http.key")
+	cfg.TLS.Key = filepath.Join(cfg.Home, "marabunta.key")
 	if !isFile(cfg.TLS.Key) {
 		needCertificate = true
 	}
-	cfg.TLS.Crt = filepath.Join(cfg.Home, "http.crt")
+	cfg.TLS.Crt = filepath.Join(cfg.Home, "marabunta.crt")
 	if !isFile(cfg.TLS.Crt) {
 		needCertificate = true
 	}

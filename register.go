@@ -109,5 +109,5 @@ func (m *Marabunta) register(w http.ResponseWriter, r *http.Request) {
 	crt := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: clientCRTRaw})
 
 	w.Header().Set("Content-Type", "application/x-x509-ca-cert")
-	w.Write(append(caFile, crt...))
+	w.Write(append(crt, caFile...))
 }

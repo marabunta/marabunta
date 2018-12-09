@@ -30,11 +30,12 @@ func createCertificates(cfg *Config) error {
 		return nil
 	}
 
+	// marabunta CA used to sign the server and client certs
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().Unix()),
 		Subject: pkix.Name{
 			Organization: []string{"marabunta"},
-			CommonName:   "marabunta",
+			CommonName:   "marabunta CA",
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0),
@@ -44,12 +45,12 @@ func createCertificates(cfg *Config) error {
 		BasicConstraintsValid: true,
 	}
 
-	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	caPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return err
 	}
 
-	caCrt, err := x509.CreateCertificate(rand.Reader, ca, ca, &priv.PublicKey, priv)
+	caCrt, err := x509.CreateCertificate(rand.Reader, ca, ca, &caPriv.PublicKey, caPriv)
 	if err != nil {
 		return err
 	}
@@ -60,7 +61,7 @@ func createCertificates(cfg *Config) error {
 		return err
 	}
 
-	privKey, err := x509.MarshalECPrivateKey(priv)
+	privKey, err := x509.MarshalECPrivateKey(caPriv)
 	if err != nil {
 		return err
 	}
@@ -76,7 +77,7 @@ func createCertificates(cfg *Config) error {
 		SerialNumber: big.NewInt(time.Now().Unix()),
 		Subject: pkix.Name{
 			Organization: []string{"marabunta"},
-			CommonName:   "HTTP",
+			CommonName:   "marabunta",
 		},
 		NotBefore:   time.Now(),
 		NotAfter:    time.Now().AddDate(3, 0, 0),
@@ -84,12 +85,13 @@ func createCertificates(cfg *Config) error {
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
 
-	priv, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return err
 	}
 
-	serverCrt, err := x509.CreateCertificate(rand.Reader, server, server, &priv.PublicKey, priv)
+	// sign certificate with the CA
+	serverCrt, err := x509.CreateCertificate(rand.Reader, server, ca, &priv.PublicKey, caPriv)
 	if err != nil {
 		return err
 	}
