@@ -23,15 +23,15 @@ func initGRPC(c *Config) (*grpc.Server, error) {
 	}
 
 	// Append the client certificates from the CA
-	caCertPool := x509.NewCertPool()
-	if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
+	certPool := x509.NewCertPool()
+	if ok := certPool.AppendCertsFromPEM(caCert); !ok {
 		return nil, errors.New("could not append CA certificate to cert pool")
 	}
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientCAs:    caCertPool,
+		ClientCAs:    certPool,
 	}
 
 	return grpc.NewServer(
