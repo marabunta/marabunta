@@ -11,26 +11,21 @@ import (
 
 // Stream stream
 func (m *Marabunta) Stream(stream pb.Marabunta_StreamServer) error {
-	var client string
+	var key string
 	ctx := stream.Context()
 	if peer, ok := peer.FromContext(ctx); ok {
 		tlsInfo := peer.AuthInfo.(credentials.TLSInfo)
-		client = tlsInfo.State.VerifiedChains[0][0].Subject.CommonName
-		m.clients.Store(client, stream)
+		client := tlsInfo.State.VerifiedChains[0][0].Subject.CommonName
+		ip := peer.Addr.String()
+		key = fmt.Sprintf("%s@%s", client, ip)
+		m.clients.Store(key, stream)
 	}
+	log.Printf("key = %+v\n", key)
 
 	for {
 		in, err := stream.Recv()
 		if err != nil {
-			m.clients.Delete(client)
-			// ----------------------------------------------------------------------------
-			length := 0
-			m.clients.Range(func(_, _ interface{}) bool {
-				length++
-				return true
-			})
-			// ----------------------------------------------------------------------------
-			log.Printf("ant: %s, %s length: %d", client, err, length)
+			m.clients.Delete(key)
 			return err
 		}
 		msg := &pb.StreamResponse{
@@ -42,7 +37,7 @@ func (m *Marabunta) Stream(stream pb.Marabunta_StreamServer) error {
 		}
 		err = stream.Send(msg)
 		if err != nil {
-			log.Printf("ant: %s, %s", client, err)
+			log.Printf("ant: %s, %s", key, err)
 		}
 	}
 }
