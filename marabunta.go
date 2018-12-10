@@ -1,8 +1,12 @@
 package marabunta
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"sync"
@@ -10,6 +14,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	pb "github.com/marabunta/protobuf"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // Marabunta struct
@@ -35,16 +40,9 @@ func New(c *Config) (*Marabunta, error) {
 		return nil, err
 	}
 
-	// initialize gRPC
-	gRPC, err := initGRPC(c)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Marabunta{
 		config: c,
 		db:     db,
-		gRPC:   gRPC,
 		redis:  redis,
 	}, nil
 }
@@ -56,6 +54,35 @@ func (m *Marabunta) Start() error {
 	if err != nil {
 		return err
 	}
+
+	cert, err := tls.LoadX509KeyPair(m.config.TLS.Crt, m.config.TLS.Key)
+	if err != nil {
+		return err
+	}
+
+	caCert, err := ioutil.ReadFile(m.config.TLS.CACrt)
+	if err != nil {
+		return fmt.Errorf("could not read CA certificate from file %q, %s", m.config.TLS.CACrt, err)
+	}
+
+	// Append the client certificates from the CA
+	certPool := x509.NewCertPool()
+	if ok := certPool.AppendCertsFromPEM(caCert); !ok {
+		return errors.New("could not append CA certificate to cert pool")
+	}
+
+	// mTLS
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
+	}
+
+	// create a gRPC server and get client info from the interceptors
+	m.gRPC = grpc.NewServer(
+		grpc.Creds(credentials.NewTLS(tlsConfig)),
+		grpc.StreamInterceptor(m.streamInterceptor),
+	)
 
 	pb.RegisterMarabuntaServer(m.gRPC, m)
 

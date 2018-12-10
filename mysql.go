@@ -73,6 +73,13 @@ var createTableStatements = []string{
 			REFERENCES jobs(id)
 			ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
+	// ants registered and connected clients
+	`CREATE TABLE IF NOT EXISTS ants (
+		id VARCHAR(64) NOT NULL,
+		cdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		last_seen DATETIME,
+		PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin`,
 }
 
 func initMySQL(c *Config) (*sql.DB, error) {
