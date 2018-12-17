@@ -18,11 +18,10 @@ func (m *Marabunta) streamInterceptor(srv interface{}, stream grpc.ServerStream,
 		client := tlsInfo.State.VerifiedChains[0][0].Subject.CommonName
 		ip := peer.Addr.String()
 
-		// TODO update ant's table
-		key := fmt.Sprintf("%s@%s", client, ip)
+		// TODO
 		fmt.Printf("client = %s\n", client)
 		fmt.Printf("ip.Addr = %s\n", ip)
-		fmt.Printf("key for map = %+v\n", key)
+
 		// read metadata
 		if md, ok := metadata.FromIncomingContext(ctx); ok {
 			log.Printf("md = %+v\n", md)
