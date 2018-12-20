@@ -26,8 +26,16 @@ func (m *Marabunta) delStream(client, ip string) {
 	ant, ok := m.clients.Load(client)
 	if ok {
 		ant.(*sync.Map).Delete(ip)
+		length := 0
+		ant.(*sync.Map).Range(func(_, _ interface{}) bool {
+			length++
+			return true
+		})
+		if length == 0 {
+			log.Printf("removing client: %s\n", client)
+			m.clients.Delete(client)
+		}
 	}
-	// TODO range? how to delete clients if there are no more ips ?
 }
 
 // Stream stream
