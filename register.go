@@ -83,19 +83,17 @@ func (m *Marabunta) register(w http.ResponseWriter, r *http.Request) {
 
 	// create client certificate template
 	clientCRTTemplate := x509.Certificate{
+		ExtKeyUsage:        []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+		Issuer:             caCRT.Subject,
+		KeyUsage:           x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		NotAfter:           time.Now().AddDate(3, 0, 0),
+		NotBefore:          time.Now(),
+		PublicKey:          clientCSR.PublicKey,
+		PublicKeyAlgorithm: clientCSR.PublicKeyAlgorithm,
+		SerialNumber:       big.NewInt(2),
 		Signature:          clientCSR.Signature,
 		SignatureAlgorithm: clientCSR.SignatureAlgorithm,
-
-		PublicKeyAlgorithm: clientCSR.PublicKeyAlgorithm,
-		PublicKey:          clientCSR.PublicKey,
-
-		SerialNumber: big.NewInt(2),
-		Issuer:       caCRT.Subject,
-		Subject:      clientCSR.Subject,
-		NotBefore:    time.Now(),
-		NotAfter:     time.Now().AddDate(3, 0, 0),
-		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+		Subject:            clientCSR.Subject,
 	}
 
 	// create client certificate from template and CA public key
